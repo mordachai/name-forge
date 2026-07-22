@@ -7,7 +7,7 @@ category, generate a batch of names, and create an actor of any type your
 game system supports directly from a suggestion. Fully self-contained -
 everything is generated locally, no internet connection required.
 
-## Instalation:
+## Installation:
 
 ```text
 
