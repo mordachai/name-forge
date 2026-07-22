@@ -7,6 +7,14 @@ category, generate a batch of names, and create an actor of any type your
 game system supports directly from a suggestion. Fully self-contained -
 everything is generated locally, no internet connection required.
 
+## Instalation:
+
+```text
+
+https://github.com/mordachai/name-forge/releases/latest/download/module.json
+
+```
+
 ## Using it
 
 1. As a GM, open the **Actors** sidebar tab. A **Name Forge** button appears
