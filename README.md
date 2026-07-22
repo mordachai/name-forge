@@ -1,5 +1,7 @@
 # Name Forge
 
+<img width="950" alt="name-gen-corp" src="https://github.com/user-attachments/assets/2aa09e48-4865-4ca7-9532-0695d8faf56c" />
+
 A system-agnostic name generator for Foundry VTT (v13/v14). Pick a genre and
 category, generate a batch of names, and create an actor of any type your
 game system supports directly from a suggestion. Fully self-contained -
