@@ -10,6 +10,30 @@
  * Genre to the Name Type selector for those.
  */
 
+import { COUNTRY_DISTRIBUTION } from "./generated/country-distribution.mjs";
+
+/**
+ * Groups every country in COUNTRY_DISTRIBUTION by region into the
+ * makeMFT() group shape, for the "World / By Country" category - a
+ * weighted-random mix of real naming cultures per NameLists/People/00
+ * World Naming Distribution.md (see profiles.mjs's weightedCultureFor()).
+ */
+function countryGroups() {
+  const byRegion = new Map();
+  for (const [country, { region }] of Object.entries(COUNTRY_DISTRIBUTION)) {
+    if (!byRegion.has(region)) byRegion.set(region, []);
+    byRegion.get(region).push(country);
+  }
+  return [...byRegion.entries()].map(([region, countries]) => ({
+    label: region,
+    options: countries.flatMap(country => [
+      { value: `${country} Male`, label: `${country} Male Names` },
+      { value: `${country} Female`, label: `${country} Female Names` },
+      { value: `${country} Town`, label: `${country} Town Names` }
+    ])
+  }));
+}
+
 export const GENRES = [
   {
     id: "fantasy",
@@ -38,6 +62,17 @@ export const GENRES = [
             { value: "Halfling Male", label: "Halfling Male Names" },
             { value: "Halfling Female", label: "Halfling Female Names" },
             { value: "Halfling Town", label: "Halfling Town Names" }
+          ]},
+          { label: "Faerykind", options: [
+            { value: "Faerykind Male", label: "Faerykind Male Names" },
+            { value: "Faerykind Female", label: "Faerykind Female Names" }
+          ]},
+          { label: "Nymphs and Sirens", options: [
+            { value: "Nymph/Siren", label: "Nymph/Siren Names" }
+          ]},
+          { label: "Primitive", options: [
+            { value: "Primitive Male", label: "Primitive Male Names" },
+            { value: "Primitive Female", label: "Primitive Female Names" }
           ]}
         ]
       },
@@ -58,6 +93,15 @@ export const GENRES = [
             { value: "Orcish Male", label: "Orcish Male Names" },
             { value: "Orcish Female", label: "Orcish Female Names" },
             { value: "Orcish Town", label: "Orcish Town Names" }
+          ]},
+          { label: "Beastfolk", options: [
+            { value: "Beastfolk Mammal", label: "Beastfolk (Mammal) Names" },
+            { value: "Beastfolk Reptile", label: "Beastfolk (Reptile) Names" },
+            { value: "Beastfolk Bird", label: "Beastfolk (Bird) Names" },
+            { value: "Beastfolk Fish", label: "Beastfolk (Fish) Names" },
+            { value: "Beastfolk Arthropod", label: "Beastfolk (Arthropod) Names" },
+            { value: "Beastfolk Mollusc", label: "Beastfolk (Mollusc) Names" },
+            { value: "Beastfolk Amphibian", label: "Beastfolk (Amphibian) Names" }
           ]}
         ]
       },
@@ -66,7 +110,8 @@ export const GENRES = [
         label: "Outsider Names",
         groups: [
           { label: "Outsider", options: [
-            { value: "Celestial", label: "Celestial Names" },
+            { value: "Celestial Male", label: "Celestial Male Names" },
+            { value: "Celestial Female", label: "Celestial Female Names" },
             { value: "Fiendish", label: "Fiendish Names" },
             { value: "Modron", label: "Modron Names" }
           ]},
@@ -125,13 +170,25 @@ export const GENRES = [
       {
         id: "me",
         label: "Medieval Europe",
-        groups: makeMFT(["English", "French", "German", "Italian", "Norse", "Saxon", "Slavic", "Spanish"])
+        groups: makeMFT([
+          "English", "French", "German", "Italian", "Norse", "Saxon", "Slavic", "Spanish",
+          "Armenian", "Dutch", "Finnish", "Gaulish", "Hungarian", "Modern Greek", "Norwegian",
+          "Polish", "Portuguese", "Romani", "Russian"
+        ])
+      },
+      {
+        id: "bi",
+        label: "British Isles",
+        groups: makeMFT([
+          "Briton", "Cornish", "English Aristocratic", "English Rustic",
+          "Gaelic", "Irish", "Scottish", "Welsh"
+        ])
       },
       {
         id: "as",
         label: "Asia and the Far East",
         groups: [
-          ...makeMFT(["Arabic", "Chinese", "Hebrew", "Hindu"]),
+          ...makeMFT(["Arabic", "Chinese", "Hebrew", "Hindu", "Jewish", "Korean", "Sanskrit", "Tibetan"]),
           { label: "Japanese", options: [
             { value: "Japanese Male", label: "Japanese Male Names" },
             { value: "Japanese Female", label: "Japanese Female Names" },
@@ -144,12 +201,22 @@ export const GENRES = [
       {
         id: "af",
         label: "Africa",
-        groups: makeMFT(["Congolese", "Egyptian", "Ethiopian", "Malian"])
+        groups: makeMFT(["African", "Berber", "Congolese", "Egyptian", "Ethiopian", "Malian"])
       },
       {
         id: "nw",
         label: "New World",
-        groups: makeMFT(["Algonquin", "Aztec", "Inkan", "Inuit", "Navajo", "Sioux"])
+        groups: makeMFT(["Algonquin", "Amerindian", "Aztec", "Inkan", "Inuit", "Mayan", "Navajo", "Sioux"])
+      },
+      {
+        id: "oc",
+        label: "Oceania",
+        groups: makeMFT(["Aboriginal", "Papuan"])
+      },
+      {
+        id: "wc",
+        label: "World / By Country",
+        groups: countryGroups()
       }
     ]
   },

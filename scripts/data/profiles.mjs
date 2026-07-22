@@ -3,26 +3,31 @@
  * generated: a namegen-engine pattern, a Markov chain over a real name
  * corpus, or a word-bank composer for "thing" names.
  *
- * Fantasy-race and invented-culture patterns are hand-written using the
- * namegen-engine pattern syntax (see namegen-engine.mjs), several adapted
- * from the long-public example patterns at the RinkWorks Fantasy Name
- * Generator (rinkworks.com/namegen), the same reference skeeto/fantasyname
- * itself is modeled on. Real-world cultures with a bundled corpus
- * (English, Spanish, Norwegian - see corpora-data.mjs) use a Markov chain
- * instead for genuine authenticity; the rest use hand-tuned phoneme
- * patterns grouped by language family.
+ * Most historical/real-world human cultures are backed by a real Markov
+ * chain trained on NameLists/People source lists (see generated/
+ * people-corpora.mjs and tools/extract-corpora.mjs) for genuine
+ * authenticity. Cultures without a clean-template source list yet
+ * (dithematic, multi-part, or tribe-subdivided naming systems - see
+ * tools/extract-corpora.mjs's header comment) fall back to a hand-written
+ * phoneme pattern, as do all fantasy-race and invented-culture names -
+ * several of the latter adapted from the long-public example patterns at
+ * the RinkWorks Fantasy Name Generator (rinkworks.com/namegen), the same
+ * reference skeeto/fantasyname itself is modeled on.
  */
 import { compile } from "./namegen-engine.mjs";
 import { trainMarkov, generateMarkovNameSafe } from "./markov.mjs";
-import {
-  ENGLISH_FIRST_NAMES, ENGLISH_SURNAMES,
-  SPANISH_FIRST_NAMES, SPANISH_SURNAMES,
-  NORWEGIAN_MALE_NAMES, NORWEGIAN_FEMALE_NAMES, NORWEGIAN_SURNAMES
-} from "./corpora-data.mjs";
+import { ENGLISH_FIRST_NAMES, ENGLISH_SURNAMES } from "./corpora-data.mjs";
+import { PEOPLE_CORPORA } from "./generated/people-corpora.mjs";
+import { GENERIC_FANTASY_NAMES } from "./generated/fantasy-corpus.mjs";
+import { COUNTRY_DISTRIBUTION } from "./generated/country-distribution.mjs";
 import * as composer from "./composer.mjs";
+import * as species from "./fantasy-species.mjs";
 
 function capitalize(str) {
   return str.replace(/^./, c => c.toUpperCase());
+}
+function pick(array) {
+  return array[Math.floor(Math.random() * array.length)];
 }
 function pattern(str) {
   return () => capitalize(String(compile(str)));
@@ -34,12 +39,7 @@ function pattern(str) {
 
 const MODELS = {
   englishFirst: trainMarkov(ENGLISH_FIRST_NAMES),
-  englishSurname: trainMarkov(ENGLISH_SURNAMES),
-  spanishFirst: trainMarkov(SPANISH_FIRST_NAMES),
-  spanishSurname: trainMarkov(SPANISH_SURNAMES),
-  norwegianMale: trainMarkov(NORWEGIAN_MALE_NAMES),
-  norwegianFemale: trainMarkov(NORWEGIAN_FEMALE_NAMES),
-  norwegianSurname: trainMarkov(NORWEGIAN_SURNAMES)
+  englishSurname: trainMarkov(ENGLISH_SURNAMES)
 };
 
 function markov(modelKey) {
@@ -47,17 +47,44 @@ function markov(modelKey) {
 }
 
 /* -------------------------------------------- */
-/* Fantasy race / creature patterns              */
+/* Real-world culture corpora (NameLists/People,  */
+/* see tools/extract-corpora.mjs), one Markov     */
+/* model per culture per gender + surname list.   */
 /* -------------------------------------------- */
 
-const ELVISH = "(|(<B>|s|h|ty|ph|r))(i|ae|ya|ae|eu|ia|i|eo|ai|a)(lo|la|sri|da|dai|the|sty|lae|due|li|lly|ri|na|ral|sur|rith)(|(su|nu|sti|llo|ria|))(|(n|ra|p|m|lis|cal|deu|dil|suir|phos|ru|dru|rin|raap|rgue))";
-const DWARVISH = "(taith|kach|chak|kank|kjar|rak|kan|kaj|tach|rskal|kjol|jok|jor|jad|kot|kon|knir|kror|kol|tul|rhaok|rhak|krol|jan|kag|ryr)(<vc>|in|or|an|ar|och|un|mar|yk|ja|arn|ir|ros|ror)(|(mund|ard|arn|karr|chim|kos|rir|arl|kni|var|an|in|ir|a|i|as))";
-const HALFLING = "!<B><v>(kin|foot|wise|weed|bottle|garden|berry|bloom)";
-const ORCISH = "(aj|ch|etz|etzl|tz|kal|gahn|kab|aj|izl|ts|jaj|lan|kach|chaj|qaq|jol|ix|az|biq|nam)(|(<vc>|aw|al|yes|il|ay|en|tom||oj|im|ol|aj|an|as))(aj|am|al|aqa|ende|elja|ich|ak|ix|in|ak|al|il|ek|ij|os|al|im)";
-const DROW = "(Zar|Vel|Quar|Xil|Nym|Dra|Ilv|Vhael)(a|i|ae|y)(neth|riss|zra|lith|dara|wyn|xir)";
-const DRACONIC = "(Vor|Bahl|Thra|Kael|Xar|Zeph|Or|Faer)(<v>|ax|yr)(thys|grim|orion|vex|drak|mordan)";
-const CELESTIAL = "(Ser|Ara|Eli|Uri|Sar|Mich|Gabri|Ophan)(<v>|el|ael)(iel|on|us|ael|eth)";
-const FIENDISH = "(Az|Bel|Mal|Xe|Vas|Bael|Mor|Nax)(<v>|ra|zu)(zael|thoth|grath|mox|riel|ix)";
+const PEOPLE_MODELS = {};
+for (const [culture, corpus] of Object.entries(PEOPLE_CORPORA)) {
+  PEOPLE_MODELS[culture] = {
+    male: trainMarkov(corpus.MALE),
+    female: trainMarkov(corpus.FEMALE),
+    surname: corpus.SURNAME.length ? trainMarkov(corpus.SURNAME) : null
+  };
+}
+
+function peopleMarkov(culture, gender) {
+  return () => generateMarkovNameSafe(PEOPLE_MODELS[culture][gender], "Alex");
+}
+/** Falls back to the culture's male-name model where no real surname list exists. */
+function peopleTown(culture) {
+  const models = PEOPLE_MODELS[culture];
+  const surnameModel = models.surname ?? models.male;
+  return () => composer.townFromSurname(() => generateMarkovNameSafe(surnameModel, "Alex"));
+}
+
+/* -------------------------------------------- */
+/* Fantasy race / creature patterns              */
+/* Transcribed from NameLists/Fantastic/04       */
+/* Fantastic Species.md - see fantasy-species.mjs */
+/* -------------------------------------------- */
+
+const ELVISH_MALE = species.ELVISH_MALE, ELVISH_FEMALE = species.ELVISH_FEMALE;
+const DWARVISH_MALE = species.DWARVISH_MALE, DWARVISH_FEMALE = species.DWARVISH_FEMALE;
+const HALFLING_MALE = species.HALFLING_MALE, HALFLING_FEMALE = species.HALFLING_FEMALE;
+const ORCISH_MALE = species.ORCISH_MALE, ORCISH_FEMALE = species.ORCISH_FEMALE;
+const DROW_MALE = species.DROW_MALE, DROW_FEMALE = species.DROW_FEMALE;
+const DRACONIC_MALE = species.DRACONIC_MALE, DRACONIC_FEMALE = species.DRACONIC_FEMALE;
+const CELESTIAL_MALE = species.CELESTIAL_MALE, CELESTIAL_FEMALE = species.CELESTIAL_FEMALE;
+const FAERYKIND_MALE = species.FAERYKIND_MALE, FAERYKIND_FEMALE = species.FAERYKIND_FEMALE;
 
 /* -------------------------------------------- */
 /* Historical / invented-culture families        */
@@ -112,37 +139,45 @@ const CULTURE_FAMILIES = {
   French: FRENCH, German: GERMANIC_HARD, Italian: LATIN, Saxon: GERMANIC_HARD, Slavic: SLAVIC,
   Arabic: ARABIC_PERSIAN, Chinese: CHINESE, Hebrew: ARABIC_PERSIAN, Hindu: HINDU,
   Japanese: JAPANESE, Mongolian: MONGOLIAN, Persian: ARABIC_PERSIAN,
-  Congolese: AFRICAN, Ethiopian: AFRICAN, Malian: AFRICAN,
+  African: AFRICAN, Congolese: AFRICAN, Ethiopian: AFRICAN, Malian: AFRICAN,
   Algonquin: NORTH_AMERICAN, Aztec: MESOAMERICAN, Inkan: MESOAMERICAN,
   Inuit: NORTH_AMERICAN, Navajo: NORTH_AMERICAN, Sioux: NORTH_AMERICAN
 };
 
 const PROFILES = {
   // Fantasy: Common
-  "Human Male": GENERIC_HUMAN, "Human Female": GENERIC_HUMAN,
+  "Human Male": () => capitalize(pick(GENERIC_FANTASY_NAMES)), "Human Female": () => capitalize(pick(GENERIC_FANTASY_NAMES)),
   "Human Town": () => composer.townFromSurname(markov("englishSurname")),
-  "Dwarvish Male": pattern(DWARVISH), "Dwarvish Female": pattern(DWARVISH),
-  "Dwarvish Town": () => composer.townFromPattern(DWARVISH, ["gard", "hall", "delve"]),
-  "Elvish Male": pattern(ELVISH), "Elvish Female": pattern(ELVISH),
-  "Elvish Town": () => composer.townFromPattern(ELVISH, ["ithil", "wyn", "lorien"]),
-  "Halfling Male": pattern(HALFLING), "Halfling Female": pattern(HALFLING),
-  "Halfling Town": () => composer.townFromPattern(HALFLING, ["bottom", "burrow", "hollow"]),
+  "Dwarvish Male": pattern(DWARVISH_MALE), "Dwarvish Female": pattern(DWARVISH_FEMALE),
+  "Dwarvish Town": () => composer.townFromPattern(DWARVISH_MALE, ["gard", "hall", "delve"]),
+  "Elvish Male": pattern(ELVISH_MALE), "Elvish Female": pattern(ELVISH_FEMALE),
+  "Elvish Town": () => composer.townFromPattern(ELVISH_MALE, ["ithil", "wyn", "lorien"]),
+  "Halfling Male": pattern(HALFLING_MALE), "Halfling Female": pattern(HALFLING_FEMALE),
+  "Halfling Town": () => composer.townFromPattern(HALFLING_MALE, ["bottom", "burrow", "hollow"]),
+  "Faerykind Male": pattern(FAERYKIND_MALE), "Faerykind Female": pattern(FAERYKIND_FEMALE),
   // Fantasy: Monstrous
-  "Draconic Male": pattern(DRACONIC), "Draconic Female": pattern(DRACONIC),
-  "Drow Male": pattern(DROW), "Drow Female": pattern(DROW),
-  "Drow Town": () => composer.townFromPattern(DROW, ["reth", "aveth"]),
-  "Orcish Male": pattern(ORCISH), "Orcish Female": pattern(ORCISH),
-  "Orcish Town": () => composer.townFromPattern(ORCISH, ["gash", "mok"]),
+  "Draconic Male": pattern(DRACONIC_MALE), "Draconic Female": pattern(DRACONIC_FEMALE),
+  "Drow Male": pattern(DROW_MALE), "Drow Female": pattern(DROW_FEMALE),
+  "Drow Town": () => composer.townFromPattern(DROW_MALE, ["reth", "aveth"]),
+  "Orcish Male": pattern(ORCISH_MALE), "Orcish Female": pattern(ORCISH_FEMALE),
+  "Orcish Town": () => composer.townFromPattern(ORCISH_MALE, ["gash", "mok"]),
+  "Nymph/Siren": species.nymphSirenName,
+  "Primitive Male": () => species.primitiveName("male"), "Primitive Female": () => species.primitiveName("female"),
+  "Beastfolk Mammal": () => species.beastfolkName("mammal"), "Beastfolk Reptile": () => species.beastfolkName("reptile"),
+  "Beastfolk Bird": () => species.beastfolkName("bird"), "Beastfolk Fish": () => species.beastfolkName("fish"),
+  "Beastfolk Arthropod": () => species.beastfolkName("arthropod"), "Beastfolk Mollusc": () => species.beastfolkName("mollusc"),
+  "Beastfolk Amphibian": () => species.beastfolkName("amphibian"),
   // Fantasy: Outsider
-  "Celestial": pattern(CELESTIAL), "Fiendish": pattern(FIENDISH), "Modron": () => composer.designation(3, 3),
+  "Celestial Male": pattern(CELESTIAL_MALE), "Celestial Female": pattern(CELESTIAL_FEMALE),
+  "Fiendish": species.fiendishName, "Modron": () => composer.designation(3, 3),
   "Air Elemental": pattern("(Zeph|Aer|Sylph|Wisp)<v>(ion|ael|yx)"),
   "Earth Elemental": pattern("(Ter|Grond|Stone|Boul)<v>(ok|dur|mek)"),
   "Fire Elemental": pattern("(Ign|Pyr|Cinder|Ember)<v>(ax|rax|flar)"),
   "Water Elemental": pattern("(Undin|Naia|Mar|Aqua)<v>(is|wyn|lir)"),
   // Fantasy Setting
-  "Party": composer.groupName, "Ship": composer.shipName, "Deity": () => composer.epithetName(CELESTIAL),
+  "Party": composer.groupName, "Ship": composer.shipName, "Deity": () => composer.epithetName(CELESTIAL_MALE),
   "Festival": composer.festivalName, "Blasphemy": composer.blasphemyName, "War": composer.warName,
-  "Tome": composer.tomeName, "Weapon": () => composer.epithetName(ELVISH),
+  "Tome": composer.tomeName, "Weapon": () => composer.epithetName(ELVISH_MALE),
   "Kingdom": composer.compoundPlaceName, "Stronghold": composer.compoundPlaceName,
   "Dungeon": composer.compoundPlaceName, "Geography": composer.compoundPlaceName,
   "Planar Location": composer.compoundPlaceName, "City": composer.compoundPlaceName,
@@ -218,16 +253,36 @@ for (const [culture, family] of Object.entries(CULTURE_FAMILIES)) {
   PROFILES[`${culture} Town`] = familyTown(family);
 }
 
-// Real-corpus Markov overrides (higher authenticity than a hand-written pattern).
-PROFILES["English Male"] = markov("englishFirst");
-PROFILES["English Female"] = markov("englishFirst");
-PROFILES["English Town"] = () => composer.townFromSurname(markov("englishSurname"));
-PROFILES["Spanish Male"] = markov("spanishFirst");
-PROFILES["Spanish Female"] = markov("spanishFirst");
-PROFILES["Spanish Town"] = () => composer.townFromSurname(markov("spanishSurname"));
-PROFILES["Norse Male"] = markov("norwegianMale");
-PROFILES["Norse Female"] = markov("norwegianFemale");
-PROFILES["Norse Town"] = () => composer.townFromSurname(markov("norwegianSurname"));
+// Real-corpus Markov overrides (higher authenticity than a hand-written pattern) -
+// covers every culture in PEOPLE_CORPORA, replacing the matching CULTURE_FAMILIES
+// pattern-based entry above where one exists (e.g. English, French, Arabic...)
+// and adding brand-new culture keys (e.g. Korean, Welsh, Berber...) otherwise.
+for (const culture of Object.keys(PEOPLE_CORPORA)) {
+  PROFILES[`${culture} Male`] = peopleMarkov(culture, "male");
+  PROFILES[`${culture} Female`] = peopleMarkov(culture, "female");
+  PROFILES[`${culture} Town`] = peopleTown(culture);
+}
+
+// World / By Country: weighted-random pick of a source culture per generated
+// name, following the real-world naming distribution in NameLists/People/00
+// World Naming Distribution.md (see generated/country-distribution.mjs).
+function weightedCultureFor(country) {
+  const { sources } = COUNTRY_DISTRIBUTION[country];
+  let roll = Math.random() * sources.reduce((sum, [, w]) => sum + w, 0);
+  for (const [culture, weight] of sources) {
+    roll -= weight;
+    if (roll <= 0) return culture;
+  }
+  return sources[sources.length - 1][0];
+}
+function countryProfile(country, type) {
+  return () => PROFILES[`${weightedCultureFor(country)} ${type}`]();
+}
+for (const country of Object.keys(COUNTRY_DISTRIBUTION)) {
+  PROFILES[`${country} Male`] = countryProfile(country, "Male");
+  PROFILES[`${country} Female`] = countryProfile(country, "Female");
+  PROFILES[`${country} Town`] = countryProfile(country, "Town");
+}
 
 // Japanese Castle uses the same family as Japanese Male/Female/Town.
 PROFILES["Japanese Castle"] = familyTown(JAPANESE);
