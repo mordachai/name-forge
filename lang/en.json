@@ -1,0 +1,17 @@
+{
+  "NF.Title": "Name Forge",
+  "NF.OpenButton": "Name Forge",
+  "NF.Blurb": "Generate names for any genre or culture, fully offline.",
+  "NF.Genre": "Genre",
+  "NF.Category": "Category",
+  "NF.NameType": "Name Type",
+  "NF.Count": "Count",
+  "NF.Generate": "Generate",
+  "NF.Results": "Results",
+  "NF.NoResults": "No names yet - press Generate.",
+  "NF.Copied": "Copied!",
+  "NF.CopyHint": "Click a name to copy it",
+  "NF.CreateAs": "Create as",
+  "NF.CreateHint": "Create an actor with this name",
+  "NF.ActorCreateFailed": "Could not create the actor. See console for details."
+}

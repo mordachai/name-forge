@@ -1,0 +1,174 @@
+/* @section: name-forge
+   @scope: NameGeneratorApp window contents.
+   Layout only - relies on core Foundry form/select/input styling and
+   theme variables (--color-text-*, --color-border-*) so it follows the
+   active light/dark theme automatically.
+*/
+
+.name-forge-app .window-content {
+  overflow-y: auto;
+}
+
+.name-forge {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.nf-blurb {
+  margin: 0;
+  font-size: 12px;
+  color: var(--color-text-dark-secondary, #888);
+}
+
+.nf-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nf-row {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.nf-row label {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.nf-row-inline {
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.nf-count {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.nf-count input {
+  text-align: center;
+}
+
+.nf-generate {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.nf-generate.nf-busy i {
+  animation: nf-spin 0.8s linear infinite;
+}
+
+@keyframes nf-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.nf-results-wrap {
+  border: 1px solid var(--color-border-light-tertiary, rgba(120, 120, 120, 0.3));
+  border-radius: 4px;
+  padding: 8px 10px;
+  min-height: 90px;
+}
+
+.nf-results-header {
+  margin-bottom: 6px;
+}
+
+.nf-results-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-dark-secondary, #888);
+}
+
+.nf-results {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nf-result-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 6px;
+  border-radius: 3px;
+}
+
+.nf-result-row:nth-child(odd) {
+  background: rgba(120, 120, 120, 0.06);
+}
+
+.nf-result-name {
+  cursor: copy;
+  flex: 1;
+}
+
+.nf-result-name:hover {
+  text-decoration: underline;
+  color: var(--color-text-accent, inherit);
+}
+
+.nf-result-name[data-copied] {
+  color: #2e9c5c;
+  font-style: italic;
+}
+
+.nf-create-btn {
+  flex: 0 0 auto;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  opacity: 0.55;
+}
+
+.nf-result-row:hover .nf-create-btn {
+  opacity: 1;
+}
+
+.nf-empty {
+  font-size: 12px;
+  color: var(--color-text-dark-secondary, #888);
+  text-align: center;
+  padding: 14px 0;
+}
+
+.nf-actor-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.nf-actor-row label {
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.nf-actor-row select {
+  flex: 1;
+}
+
+.nf-open-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
