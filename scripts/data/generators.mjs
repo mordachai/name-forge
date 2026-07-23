@@ -265,7 +265,7 @@ export const GENRES = [
       },
       {
         id: "ff",
-        label: "Serenity",
+        label: "Serenity-Inspired",
         groups: [
           { label: "Character", options: [
             { value: "Serenity Male", label: "Male Names" },
@@ -281,7 +281,7 @@ export const GENRES = [
       },
       {
         id: "st",
-        label: "Star Trek",
+        label: "Star Trek-Inspired",
         groups: [
           { label: "Character", options: [
             { value: "Star Trek Male", label: "Human Male Names" },
@@ -308,7 +308,7 @@ export const GENRES = [
       },
       {
         id: "sw",
-        label: "Star Wars",
+        label: "Star Wars-Inspired",
         groups: [
           { label: "Character", options: [
             { value: "Star Wars Male", label: "Male Names" },
@@ -338,20 +338,20 @@ export const GENRES = [
         id: "mx",
         label: "Miscellany",
         groups: [
-          { label: "Avatar", options: [
+          { label: "Avatar-Inspired", options: [
             { value: "Navi Male", label: "Na'vi Male Names" },
             { value: "Navi Female", label: "Na'vi Female Names" }
           ]},
-          { label: "Babylon 5", options: [
+          { label: "Babylon 5-Inspired", options: [
             { value: "Centauri", label: "Centauri Names" },
             { value: "Minbari", label: "Minbari Names" },
             { value: "Narn", label: "Narn Names" }
           ]},
-          { label: "Crest of the Stars", options: [
+          { label: "Crest of the Stars-Inspired", options: [
             { value: "Abh Male", label: "Abh Male Names" },
             { value: "Abh Female", label: "Abh Female Names" }
           ]},
-          { label: "Pern", options: [
+          { label: "Pern-Inspired", options: [
             { value: "Pern Male", label: "Pern Male Names" },
             { value: "Pern Female", label: "Pern Female Names" },
             { value: "Pern Dragon", label: "Pern Dragon Names" }
@@ -394,11 +394,11 @@ export const GENRES = [
   },
   {
     id: "alien",
-    label: "Alien RPG",
+    label: "Alien-Inspired",
     categories: [
       {
         id: "alien",
-        label: "Alien RPG",
+        label: "Alien-Inspired",
         groups: [
           { label: "Character", options: [
             { value: "Alien RPG Male", label: "Male Names" },
@@ -415,11 +415,11 @@ export const GENRES = [
   },
   {
     id: "blade_runner",
-    label: "Blade Runner",
+    label: "Blade Runner-Inspired",
     categories: [
       {
         id: "blade_runner",
-        label: "Blade Runner",
+        label: "Blade Runner-Inspired",
         groups: [
           { label: "Character", options: [
             { value: "BR Male", label: "Male Names" },
@@ -435,11 +435,11 @@ export const GENRES = [
   },
   {
     id: "avatar",
-    label: "Avatar Legends",
+    label: "Avatar Legends-Inspired",
     categories: [
       {
         id: "avatar",
-        label: "Avatar Legends",
+        label: "Avatar Legends-Inspired",
         groups: [
           { label: "Character", options: [
             { value: "Air Nomad Male", label: "Air Nomad Male Names" },
