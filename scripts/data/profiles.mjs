@@ -293,6 +293,47 @@ for (const culture of ["Arabic", "Aztec", "Chinese", "Egyptian", "Sumerian"]) {
   PROFILES[`${culture} Female`] ??= familyName(CULTURE_FAMILIES[culture]);
 }
 
+/* -------------------------------------------- */
+/* Compound (full) names: first + surname, for   */
+/* Historical / Real-World Male & Female types.  */
+/* -------------------------------------------- */
+
+function surnameGeneratorFor(culture) {
+  const model = PEOPLE_MODELS[culture];
+  if (model?.surname) return () => generateMarkovNameSafe(model.surname, "Alex");
+  if (model) return () => generateMarkovNameSafe(model.male, "Alex");
+  const family = CULTURE_FAMILIES[culture];
+  if (family) return familyName(family);
+  return null;
+}
+
+function compoundNameFor(culture, gender) {
+  const firstFn = PROFILES[`${culture} ${gender}`] ?? GENERIC_HUMAN;
+  const surnameFn = surnameGeneratorFor(culture);
+  if (!surnameFn) return firstFn();
+  return `${firstFn()} ${surnameFn()}`;
+}
+
+/**
+ * @param {string} type  A "{Culture} Male"/"{Culture} Female" type value.
+ * @returns {(() => string) | null}  A first-plus-surname name generator, or
+ *   null if `type` has no surname concept to compound with (fantasy races,
+ *   Town/Setting types, ...).
+ */
+export function getCompoundProfile(type) {
+  const match = /^(.+) (Male|Female)$/.exec(type);
+  if (!match) return null;
+  const [, culture, gender] = match;
+
+  if (COUNTRY_DISTRIBUTION[culture]) {
+    return () => compoundNameFor(weightedCultureFor(culture), gender);
+  }
+  if (PEOPLE_MODELS[culture] || CULTURE_FAMILIES[culture]) {
+    return () => compoundNameFor(culture, gender);
+  }
+  return null;
+}
+
 /**
  * @param {string} type  A donjon-style type value from generators.mjs.
  * @returns {() => string} A zero-argument function producing one name.

@@ -35,6 +35,15 @@
       </select>
     </div>
 
+    {{#if showCompound}}
+    <div class="nf-row">
+      <label class="nf-checkbox-label" for="nf-compound">
+        <input type="checkbox" id="nf-compound" name="compound" {{#if compound}}checked{{/if}} />
+        {{localize "NF.CompoundNames"}}
+      </label>
+    </div>
+    {{/if}}
+
     <div class="nf-row nf-row-inline">
       <div class="nf-count">
         <label for="nf-count">{{localize "NF.Count"}}</label>

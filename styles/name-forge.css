@@ -44,6 +44,15 @@
   gap: 10px;
 }
 
+.nf-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
 .nf-count {
   display: flex;
   flex-direction: column;

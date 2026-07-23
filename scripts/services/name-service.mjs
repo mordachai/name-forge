@@ -1,4 +1,4 @@
-import { getProfile } from "../data/profiles.mjs";
+import { getProfile, getCompoundProfile } from "../data/profiles.mjs";
 import { isClean } from "../data/filter.mjs";
 
 const MAX_ATTEMPTS_PER_NAME = 15;
@@ -11,10 +11,13 @@ const MAX_ATTEMPTS_PER_NAME = 15;
  *
  * @param {string} type
  * @param {number} n
+ * @param {{compound?: boolean}} [options]  `compound: true` generates
+ *   first-plus-surname names where `type` supports it (see
+ *   getCompoundProfile); falls back to the normal profile otherwise.
  * @returns {string[]}
  */
-export function generateNames(type, n) {
-  const generate = getProfile(type);
+export function generateNames(type, n, { compound = false } = {}) {
+  const generate = (compound && getCompoundProfile(type)) || getProfile(type);
   const results = [];
   const seen = new Set();
 

@@ -9,7 +9,8 @@ const DEFAULT_SELECTION = {
   categoryId: "com",
   typeValue: "Human Male",
   count: 20,
-  actorType: null
+  actorType: null,
+  compound: false
 };
 
 /**
@@ -66,8 +67,9 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
     const actorType = actorTypes.includes(selection.actorType) ? selection.actorType : actorTypes[0];
 
     const count = Number.isInteger(selection.count) ? Math.clamp(selection.count, 1, 30) : 10;
+    const compound = !!selection.compound;
 
-    return { genreId: genre.id, categoryId: category.id, typeValue, count, actorType };
+    return { genreId: genre.id, categoryId: category.id, typeValue, count, actorType, compound };
   }
 
   async _saveSelection() {
@@ -93,6 +95,8 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
       options: g.options.map(o => ({ ...o, selected: o.value === this.selection.typeValue }))
     }));
     context.count = this.selection.count;
+    context.showCompound = genre.id === "historical";
+    context.compound = this.selection.compound;
     context.isGM = game.user.isGM;
     context.actorTypes = getActorTypes().map(t => ({
       value: t,
@@ -130,6 +134,11 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
       await this._saveSelection();
     });
 
+    root.querySelector("#nf-compound")?.addEventListener("change", async ev => {
+      this.selection.compound = ev.target.checked;
+      await this._saveSelection();
+    });
+
     root.querySelector("#nf-count")?.addEventListener("change", async ev => {
       this.selection.count = Number(ev.target.value) || 10;
       await this._saveSelection();
@@ -158,7 +167,7 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
     resultsList.replaceChildren();
 
     try {
-      const names = generateNames(this.selection.typeValue, this.selection.count);
+      const names = generateNames(this.selection.typeValue, this.selection.count, { compound: this.selection.compound });
       this._renderResults(names);
       this._clampToViewport();
     } finally {
