@@ -2,3 +2,8 @@ module.zip
 .DS_Store
 Thumbs.db
 .claude/
+
+# working notes / source lists, not used at runtime
+NameLists.md
+NameLists/
+Naming Rules.md
