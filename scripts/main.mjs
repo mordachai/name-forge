@@ -12,7 +12,7 @@ Hooks.once("init", () => {
       genreId: "fantasy",
       categoryId: "com",
       typeValue: "Human Male",
-      count: 10,
+      count: 20,
       actorType: null
     }
   });

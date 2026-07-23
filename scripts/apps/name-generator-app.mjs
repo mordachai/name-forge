@@ -8,7 +8,7 @@ const DEFAULT_SELECTION = {
   genreId: "fantasy",
   categoryId: "com",
   typeValue: "Human Male",
-  count: 10,
+  count: 20,
   actorType: null
 };
 
@@ -34,7 +34,7 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
       icon: "fa-solid fa-signature",
       resizable: true
     },
-    position: { width: 460, height: "auto" }
+    position: { width: 580, height: "auto" }
   };
 
   /** @override */
@@ -160,9 +160,21 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
     try {
       const names = generateNames(this.selection.typeValue, this.selection.count);
       this._renderResults(names);
+      this._clampToViewport();
     } finally {
       button?.classList.remove("nf-busy");
       button && (button.disabled = false);
+    }
+  }
+
+  _clampToViewport() {
+    const el = this.element;
+    if (!el) return;
+    const margin = 8;
+    const rect = el.getBoundingClientRect();
+    const maxTop = window.innerHeight - rect.height - margin;
+    if (rect.top > maxTop) {
+      this.setPosition({ top: Math.max(margin, maxTop) });
     }
   }
 
@@ -173,12 +185,19 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
     resultsList.replaceChildren();
 
     if (!names.length) {
+      resultsList.style.gridTemplateColumns = "";
+      resultsList.style.gridTemplateRows = "";
       const empty = document.createElement("li");
       empty.className = "nf-empty";
       empty.textContent = game.i18n.localize("NF.NoResults");
       resultsList.append(empty);
       return;
     }
+
+    const columns = Math.min(3, Math.ceil(names.length / 10));
+    const rows = Math.ceil(names.length / columns);
+    resultsList.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+    resultsList.style.gridTemplateRows = `repeat(${rows}, auto)`;
 
     const isGM = game.user.isGM;
     for (const name of names) {

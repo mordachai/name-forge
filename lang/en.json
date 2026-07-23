@@ -5,7 +5,7 @@
   "NF.Genre": "Genre",
   "NF.Category": "Category",
   "NF.NameType": "Name Type",
-  "NF.Count": "Count",
+  "NF.Count": "Count (max. 30)",
   "NF.Generate": "Generate",
   "NF.Results": "Results",
   "NF.NoResults": "No names yet - press Generate.",
