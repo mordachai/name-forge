@@ -14,5 +14,9 @@
   "NF.CopyHint": "Click a name to copy it",
   "NF.CreateAs": "Create as",
   "NF.CreateHint": "Create an actor with this name",
-  "NF.ActorCreateFailed": "Could not create the actor. See console for details."
+  "NF.ActorCreateFailed": "Could not create the actor. See console for details.",
+  "NF.Settings.OnlyGenerateNames.Name": "Only Generate Names",
+  "NF.Settings.OnlyGenerateNames.Hint": "Hide the \"Create as\" actor-type picker and the per-result actor-creation button, leaving name generation/copying only. Turn off to bring back actor creation.",
+  "NF.Settings.ShowDirectoryButton.Name": "Show Button in Actors Directory",
+  "NF.Settings.ShowDirectoryButton.Hint": "Show the Name Forge button at the bottom of the Actors sidebar tab."
 }

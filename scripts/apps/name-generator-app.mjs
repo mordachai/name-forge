@@ -1,4 +1,4 @@
-import { MODULE_ID, SETTING_LAST_SELECTION } from "../constants.mjs";
+import { MODULE_ID, SETTING_LAST_SELECTION, SETTING_ONLY_GENERATE_NAMES } from "../constants.mjs";
 import { GENRES, getGenre, getCategory, flattenOptions } from "../data/generators.mjs";
 import { generateNames } from "../services/name-service.mjs";
 
@@ -98,6 +98,8 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
     context.showCompound = genre.id === "historical";
     context.compound = this.selection.compound;
     context.isGM = game.user.isGM;
+    context.onlyGenerateNames = game.settings.get(MODULE_ID, SETTING_ONLY_GENERATE_NAMES);
+    context.showActorControls = context.isGM && !context.onlyGenerateNames;
     context.actorTypes = getActorTypes().map(t => ({
       value: t,
       label: actorTypeLabel(t),
@@ -117,7 +119,8 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
       this.selection.categoryId = genre.categories[0].id;
       this.selection.typeValue = flattenOptions(genre.categories[0])[0]?.value;
       await this._saveSelection();
-      this.render();
+      await this.render();
+      this._onGenerate();
     });
 
     root.querySelector("#nf-category")?.addEventListener("change", async ev => {
@@ -126,12 +129,14 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
       const category = getCategory(genre, this.selection.categoryId);
       this.selection.typeValue = flattenOptions(category)[0]?.value;
       await this._saveSelection();
-      this.render();
+      await this.render();
+      this._onGenerate();
     });
 
     root.querySelector("#nf-type")?.addEventListener("change", async ev => {
       this.selection.typeValue = ev.target.value;
       await this._saveSelection();
+      this._onGenerate();
     });
 
     root.querySelector("#nf-compound")?.addEventListener("change", async ev => {
@@ -208,7 +213,7 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
     resultsList.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
     resultsList.style.gridTemplateRows = `repeat(${rows}, auto)`;
 
-    const isGM = game.user.isGM;
+    const isGM = game.user.isGM && !game.settings.get(MODULE_ID, SETTING_ONLY_GENERATE_NAMES);
     for (const name of names) {
       const li = document.createElement("li");
       li.className = "nf-result-row";
