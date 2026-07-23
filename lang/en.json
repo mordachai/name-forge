@@ -5,6 +5,7 @@
   "NF.Genre": "Genre",
   "NF.Category": "Category",
   "NF.NameType": "Name Type",
+  "NF.SearchNameType": "Search name types...",
   "NF.CompoundNames": "Compound names (first + surname)",
   "NF.Count": "Count (max. 30)",
   "NF.Generate": "Generate",

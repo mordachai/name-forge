@@ -94,6 +94,7 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
       label: g.label,
       options: g.options.map(o => ({ ...o, selected: o.value === this.selection.typeValue }))
     }));
+    context.typeLabel = flattenOptions(category).find(o => o.value === this.selection.typeValue)?.label ?? "";
     context.count = this.selection.count;
     context.showCompound = genre.id === "historical";
     context.compound = this.selection.compound;
@@ -133,11 +134,7 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
       this._onGenerate();
     });
 
-    root.querySelector("#nf-type")?.addEventListener("change", async ev => {
-      this.selection.typeValue = ev.target.value;
-      await this._saveSelection();
-      this._onGenerate();
-    });
+    this._setupTypeCombo(root);
 
     root.querySelector("#nf-compound")?.addEventListener("change", async ev => {
       this.selection.compound = ev.target.checked;
@@ -156,6 +153,137 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
     });
 
     root.querySelector("[data-action='generate']")?.addEventListener("click", () => this._onGenerate());
+  }
+
+  /**
+   * The Name Type picker is a custom combobox, not a native <select>: for
+   * categories like "World / By Country" the list spans dozens of
+   * region-grouped countries, and a native <select>'s popup has no room
+   * for a search box - typing only jumps to the next option starting with
+   * that letter, which doesn't help when you're hunting by region/culture
+   * name. This renders a button that opens a panel with a search input
+   * (filtering by substring, collapsing empty region groups) and a
+   * click/keyboard-selectable option list.
+   */
+  _setupTypeCombo(root) {
+    const combo = root.querySelector("#nf-type-combo");
+    const trigger = root.querySelector("#nf-type-trigger");
+    const panel = root.querySelector("#nf-type-panel");
+    const search = root.querySelector("#nf-type-search");
+    const list = root.querySelector("#nf-type-list");
+    if (!combo || !trigger || !panel || !search || !list) return;
+
+    trigger.addEventListener("click", () => {
+      if (panel.hidden) this._openTypeCombo(panel, trigger, search, list);
+      else this._closeTypeCombo(panel, trigger);
+    });
+
+    search.addEventListener("input", () => this._filterTypeOptions(search.value, list));
+
+    search.addEventListener("keydown", ev => {
+      if (ev.key === "Escape") {
+        ev.preventDefault();
+        this._closeTypeCombo(panel, trigger);
+        trigger.focus();
+      } else if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
+        ev.preventDefault();
+        this._moveTypeHighlight(list, ev.key === "ArrowDown" ? 1 : -1);
+      } else if (ev.key === "Enter") {
+        ev.preventDefault();
+        const target = list.querySelector(".nf-combo-option.nf-combo-highlight") ?? list.querySelector(".nf-combo-option:not([hidden])");
+        if (target) this._selectType(target, panel, trigger);
+      }
+    });
+
+    // mousedown, not click: the search input's blur (focusout, below) fires
+    // between mousedown and click, which closes/hides the panel first and
+    // swallows the click before it ever reaches this listener.
+    list.addEventListener("mousedown", ev => {
+      const option = ev.target.closest(".nf-combo-option");
+      if (!option || option.hidden) return;
+      ev.preventDefault();
+      this._selectType(option, panel, trigger);
+    });
+
+    combo.addEventListener("focusout", ev => {
+      if (!combo.contains(ev.relatedTarget)) this._closeTypeCombo(panel, trigger);
+    });
+  }
+
+  _openTypeCombo(panel, trigger, search, list) {
+    panel.hidden = false;
+    trigger.setAttribute("aria-expanded", "true");
+    search.value = "";
+    this._filterTypeOptions("", list);
+    search.focus();
+
+    const selected = list.querySelector(".nf-combo-option[aria-selected='true']");
+    if (selected) {
+      selected.classList.add("nf-combo-highlight");
+      selected.scrollIntoView({ block: "center" });
+    }
+  }
+
+  _closeTypeCombo(panel, trigger) {
+    panel.hidden = true;
+    trigger.setAttribute("aria-expanded", "false");
+  }
+
+  async _selectType(option, panel, trigger) {
+    this.selection.typeValue = option.dataset.value;
+    await this._saveSelection();
+
+    const list = option.closest(".nf-combo-list");
+    list?.querySelectorAll(".nf-combo-option[aria-selected]").forEach(o => o.removeAttribute("aria-selected"));
+    option.setAttribute("aria-selected", "true");
+
+    const valueEl = trigger.querySelector(".nf-combo-value");
+    if (valueEl) valueEl.textContent = option.dataset.label;
+
+    this._closeTypeCombo(panel, trigger);
+    this._onGenerate();
+  }
+
+  /**
+   * Filters the option list by substring match, hiding whole region/culture
+   * group headings once none of their options match.
+   */
+  _filterTypeOptions(query, list) {
+    const needle = query.trim().toLowerCase();
+    const items = [...list.children];
+
+    for (const li of items) {
+      if (li.classList.contains("nf-combo-option")) {
+        li.hidden = !(!needle || li.dataset.label.toLowerCase().includes(needle));
+        li.classList.remove("nf-combo-highlight");
+      }
+    }
+
+    let currentGroup = null;
+    let groupHasVisible = false;
+    for (const li of items) {
+      if (li.classList.contains("nf-combo-group")) {
+        if (currentGroup) currentGroup.hidden = !groupHasVisible;
+        currentGroup = li;
+        groupHasVisible = false;
+      } else if (!li.hidden) {
+        groupHasVisible = true;
+      }
+    }
+    if (currentGroup) currentGroup.hidden = !groupHasVisible;
+  }
+
+  _moveTypeHighlight(list, delta) {
+    const visible = [...list.querySelectorAll(".nf-combo-option:not([hidden])")];
+    if (!visible.length) return;
+
+    const currentIndex = visible.findIndex(o => o.classList.contains("nf-combo-highlight"));
+    let nextIndex = currentIndex + delta;
+    nextIndex = Math.max(0, Math.min(visible.length - 1, nextIndex));
+
+    visible.forEach(o => o.classList.remove("nf-combo-highlight"));
+    visible[nextIndex].classList.add("nf-combo-highlight");
+    visible[nextIndex].scrollIntoView({ block: "nearest" });
   }
 
   /* -------------------------------------------- */

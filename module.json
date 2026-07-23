@@ -2,7 +2,7 @@
   "id": "name-forge",
   "title": "Name Forge",
   "description": "<p>A system-agnostic name generator for characters, NPCs, places and more, right from the Actors sidebar. Pick a genre and category, generate a batch of names, and create an actor of any type your system supports directly from a suggestion. Fully self-contained - no internet connection required.</p>",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "compatibility": {
     "minimum": "13",
     "verified": "14"

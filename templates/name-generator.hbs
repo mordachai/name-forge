@@ -23,16 +23,24 @@
     {{/if}}
 
     <div class="nf-row">
-      <label for="nf-type">{{localize "NF.NameType"}}</label>
-      <select id="nf-type" name="type">
-        {{#each groups}}
-        <optgroup label="{{this.label}}">
-          {{#each this.options}}
-          <option value="{{this.value}}" {{#if this.selected}}selected{{/if}}>{{this.label}}</option>
-          {{/each}}
-        </optgroup>
-        {{/each}}
-      </select>
+      <label id="nf-type-label">{{localize "NF.NameType"}}</label>
+      <div class="nf-combo" id="nf-type-combo">
+        <button type="button" class="nf-combo-trigger" id="nf-type-trigger" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="nf-type-label">
+          <span class="nf-combo-value">{{typeLabel}}</span>
+          <i class="fa-solid fa-chevron-down"></i>
+        </button>
+        <div class="nf-combo-panel" id="nf-type-panel" hidden>
+          <input type="search" class="nf-combo-search" id="nf-type-search" placeholder="{{localize 'NF.SearchNameType'}}" autocomplete="off" />
+          <ul class="nf-combo-list" id="nf-type-list" role="listbox">
+            {{#each groups}}
+            <li class="nf-combo-group">{{this.label}}</li>
+            {{#each this.options}}
+            <li class="nf-combo-option" role="option" data-value="{{this.value}}" data-label="{{this.label}}" {{#if this.selected}}aria-selected="true"{{/if}}>{{this.label}}</li>
+            {{/each}}
+            {{/each}}
+          </ul>
+        </div>
+      </div>
     </div>
 
     {{#if showCompound}}
