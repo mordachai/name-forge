@@ -1,3 +1,7 @@
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W01A1ZN1)
+
+![Foundry v14](https://img.shields.io/badge/foundry-v14-blue?style=for-the-badge)  ![Github All Releases](https://img.shields.io/github/downloads/mordachai/name-forge/total.svg?style=for-the-badge) ![GitHub Release](https://img.shields.io/github/v/release/mordachai/name-forge?display_name=tag&style=for-the-badge&label=Current%20version)  [![Forge Installs](https://img.shields.io/badge/dynamic/json?label=Forge%20Installs&query=package.installs&url=https%3A%2F%2Fforge-vtt.com%2Fapi%2Fbazaar%2Fpackage%2Fname-forged&color=bf360c&style=for-the-badge)](https://forge-vtt.com/bazaar/package/name-forge)
+
 # Name Forge
 
 <img width="950" alt="image" src="https://github.com/user-attachments/assets/288fd33e-5090-46c3-9415-925a74e68e17" />
