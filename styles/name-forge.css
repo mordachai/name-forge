@@ -202,17 +202,6 @@
   .nf-switch-track, .nf-switch-track::after { transition: none; }
 }
 
-.nf-hint {
-  margin: -4px 0 0;
-  font-size: 13px;
-  font-style: italic;
-  color: var(--nf-muted);
-}
-
-.nf-hint[hidden] {
-  display: none;
-}
-
 .nf-combo {
   position: relative;
 }
