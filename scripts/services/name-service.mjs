@@ -14,10 +14,12 @@ const MAX_ATTEMPTS_PER_NAME = 15;
  * @param {{compound?: boolean}} [options]  `compound: true` generates
  *   first-plus-surname names where `type` supports it (see
  *   getCompoundProfile); falls back to the normal profile otherwise.
+ *   `source: true` returns real corpus names instead of Markov-generated
+ *   ones where the type has a corpus (see getProfile).
  * @returns {string[]}
  */
-export function generateNames(type, n, { compound = false } = {}) {
-  const generate = (compound && getCompoundProfile(type)) || getProfile(type);
+export function generateNames(type, n, { compound = false, source = false } = {}) {
+  const generate = (compound && getCompoundProfile(type, { source })) || getProfile(type, { source });
   const results = [];
   const seen = new Set();
 

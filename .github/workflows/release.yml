@@ -57,3 +57,27 @@ jobs:
           files: |
             module.zip
             module.json
+
+      - name: Publish to Foundry package listing
+        if: steps.check_tag.outputs.exists == 'false'
+        env:
+          FOUNDRY_RELEASE_TOKEN: ${{ secrets.FOUNDRY_RELEASE_TOKEN }}
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          REPO=${{ github.repository }}
+          jq -n \
+            --arg id "$(jq -r .id module.json)" \
+            --arg version "$VERSION" \
+            --arg manifest "https://github.com/${REPO}/releases/download/v${VERSION}/module.json" \
+            --arg notes "https://github.com/${REPO}/releases/tag/v${VERSION}" \
+            --arg min "$(jq -r .compatibility.minimum module.json)" \
+            --arg verified "$(jq -r .compatibility.verified module.json)" \
+            '{id: $id, release: {version: $version, manifest: $manifest, notes: $notes, compatibility: {minimum: $min, verified: $verified}}}' \
+            > payload.json
+          HTTP=$(curl -sS -o response.json -w "%{http_code}" \
+            -X POST "https://foundryvtt.com/_api/packages/release_version/" \
+            -H "Content-Type: application/json" \
+            -H "Authorization: ${FOUNDRY_RELEASE_TOKEN}" \
+            -d @payload.json)
+          cat response.json; echo
+          [ "$HTTP" = "200" ]

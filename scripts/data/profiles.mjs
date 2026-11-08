@@ -64,6 +64,11 @@ for (const [culture, corpus] of Object.entries(PEOPLE_CORPORA)) {
 function peopleMarkov(culture, gender) {
   return () => generateMarkovNameSafe(PEOPLE_MODELS[culture][gender], "Alex");
 }
+/** Picks a real name straight from the culture's corpus (no Markov blending). */
+function peopleSource(culture, gender) {
+  const corpus = PEOPLE_CORPORA[culture][gender.toUpperCase()];
+  return () => pick(corpus);
+}
 /** Falls back to the culture's male-name model where no real surname list exists. */
 function peopleTown(culture) {
   const models = PEOPLE_MODELS[culture];
@@ -298,8 +303,13 @@ for (const culture of ["Arabic", "Aztec", "Chinese", "Egyptian", "Sumerian"]) {
 /* Historical / Real-World Male & Female types.  */
 /* -------------------------------------------- */
 
-function surnameGeneratorFor(culture) {
+function surnameGeneratorFor(culture, source = false) {
   const model = PEOPLE_MODELS[culture];
+  if (source && model) {
+    const corpus = PEOPLE_CORPORA[culture];
+    const list = corpus.SURNAME.length ? corpus.SURNAME : corpus.MALE;
+    return () => pick(list);
+  }
   if (model?.surname) return () => generateMarkovNameSafe(model.surname, "Alex");
   if (model) return () => generateMarkovNameSafe(model.male, "Alex");
   const family = CULTURE_FAMILIES[culture];
@@ -307,9 +317,9 @@ function surnameGeneratorFor(culture) {
   return null;
 }
 
-function compoundNameFor(culture, gender) {
-  const firstFn = PROFILES[`${culture} ${gender}`] ?? GENERIC_HUMAN;
-  const surnameFn = surnameGeneratorFor(culture);
+function compoundNameFor(culture, gender, source = false) {
+  const firstFn = (source && SOURCE_PROFILES[`${culture} ${gender}`]) || PROFILES[`${culture} ${gender}`] || (source ? SOURCE_GENERIC_HUMAN : GENERIC_HUMAN);
+  const surnameFn = surnameGeneratorFor(culture, source);
   if (!surnameFn) return firstFn();
   return `${firstFn()} ${surnameFn()}`;
 }
@@ -320,24 +330,56 @@ function compoundNameFor(culture, gender) {
  *   null if `type` has no surname concept to compound with (fantasy races,
  *   Town/Setting types, ...).
  */
-export function getCompoundProfile(type) {
+export function getCompoundProfile(type, { source = false } = {}) {
   const match = /^(.+) (Male|Female)$/.exec(type);
   if (!match) return null;
   const [, culture, gender] = match;
 
   if (COUNTRY_DISTRIBUTION[culture]) {
-    return () => compoundNameFor(weightedCultureFor(culture), gender);
+    return () => compoundNameFor(weightedCultureFor(culture), gender, source);
   }
   if (PEOPLE_MODELS[culture] || CULTURE_FAMILIES[culture]) {
-    return () => compoundNameFor(culture, gender);
+    return () => compoundNameFor(culture, gender, source);
   }
   return null;
 }
 
+/* -------------------------------------------- */
+/* "Source names only": real names picked as-is  */
+/* from the corpora instead of Markov-generated. */
+/* Types without a corpus keep their generator.  */
+/* -------------------------------------------- */
+
+const SOURCE_GENERIC_HUMAN = () => pick(ENGLISH_FIRST_NAMES);
+const SOURCE_PROFILES = {};
+for (const culture of Object.keys(PEOPLE_CORPORA)) {
+  SOURCE_PROFILES[`${culture} Male`] = peopleSource(culture, "male");
+  SOURCE_PROFILES[`${culture} Female`] = peopleSource(culture, "female");
+}
+for (const country of Object.keys(COUNTRY_DISTRIBUTION)) {
+  for (const type of ["Male", "Female"]) {
+    SOURCE_PROFILES[`${country} ${type}`] = () => {
+      const key = `${weightedCultureFor(country)} ${type}`;
+      return (SOURCE_PROFILES[key] ?? PROFILES[key])();
+    };
+  }
+}
+
 /**
  * @param {string} type  A donjon-style type value from generators.mjs.
+ * @param {{source?: boolean}} [options]  `source: true` returns real names
+ *   from the corpus where the type has one (people names), else the usual generator.
  * @returns {() => string} A zero-argument function producing one name.
  */
-export function getProfile(type) {
+export function getProfile(type, { source = false } = {}) {
+  if (source) {
+    const fn = SOURCE_PROFILES[type] ?? (PROFILES[type] ? null : SOURCE_GENERIC_HUMAN);
+    if (fn) return fn;
+  }
   return PROFILES[type] ?? GENERIC_HUMAN;
+}
+
+/** @returns {boolean} Whether `type` can honour "source names only". */
+export function hasSourceNames(type) {
+  return !!SOURCE_PROFILES[type] || type === "Human Male" || type === "Human Female";
 }

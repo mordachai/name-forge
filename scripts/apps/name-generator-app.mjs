@@ -1,6 +1,7 @@
 import { MODULE_ID, SETTING_LAST_SELECTION, SETTING_ONLY_GENERATE_NAMES } from "../constants.mjs";
 import { GENRES, getGenre, getCategory, flattenOptions } from "../data/generators.mjs";
 import { generateNames } from "../services/name-service.mjs";
+import { hasSourceNames } from "../data/profiles.mjs";
 
 const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
@@ -10,7 +11,8 @@ const DEFAULT_SELECTION = {
   typeValue: "Human Male",
   count: 20,
   actorType: null,
-  compound: false
+  compound: false,
+  source: false
 };
 
 /**
@@ -68,8 +70,9 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
 
     const count = Number.isInteger(selection.count) ? Math.clamp(selection.count, 1, 30) : 10;
     const compound = !!selection.compound;
+    const source = !!selection.source;
 
-    return { genreId: genre.id, categoryId: category.id, typeValue, count, actorType, compound };
+    return { genreId: genre.id, categoryId: category.id, typeValue, count, actorType, compound, source };
   }
 
   async _saveSelection() {
@@ -98,6 +101,8 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
     context.count = this.selection.count;
     context.showCompound = genre.id === "historical";
     context.compound = this.selection.compound;
+    context.source = this.selection.source;
+    context.sourceAvailable = hasSourceNames(this.selection.typeValue);
     context.isGM = game.user.isGM;
     context.onlyGenerateNames = game.settings.get(MODULE_ID, SETTING_ONLY_GENERATE_NAMES);
     context.showActorControls = context.isGM && !context.onlyGenerateNames;
@@ -140,6 +145,13 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
       this.selection.compound = ev.target.checked;
       await this._saveSelection();
     });
+
+    root.querySelector("#nf-source")?.addEventListener("change", async ev => {
+      this.selection.source = ev.target.checked;
+      await this._saveSelection();
+    });
+
+    root.querySelector("[data-action='copy-all']")?.addEventListener("click", ev => this._copyAll(ev.currentTarget));
 
     root.querySelector("#nf-count")?.addEventListener("change", async ev => {
       this.selection.count = Number(ev.target.value) || 10;
@@ -240,6 +252,9 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
     const valueEl = trigger.querySelector(".nf-combo-value");
     if (valueEl) valueEl.textContent = option.dataset.label;
 
+    const sourceBox = this.element.querySelector("#nf-source");
+    if (sourceBox) sourceBox.disabled = !hasSourceNames(this.selection.typeValue);
+
     this._closeTypeCombo(panel, trigger);
     this._onGenerate();
   }
@@ -300,13 +315,35 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
     resultsList.replaceChildren();
 
     try {
-      const names = generateNames(this.selection.typeValue, this.selection.count, { compound: this.selection.compound });
+      const names = generateNames(this.selection.typeValue, this.selection.count, { compound: this.selection.compound, source: this.selection.source });
       this._renderResults(names);
       this._clampToViewport();
     } finally {
       button?.classList.remove("nf-busy");
       button && (button.disabled = false);
     }
+  }
+
+  /** Keeps the Real names switch in step with the selected type. */
+  _syncSourceUi() {
+    const root = this.element;
+    const available = hasSourceNames(this.selection.typeValue);
+    root.querySelector("#nf-source-switch").hidden = !available;
+    root.querySelector("#nf-source").checked = this.selection.source && available;
+  }
+
+  async _copyAll(button) {
+    const names = [...this.element.querySelectorAll(".nf-result-name")].map(n => n.dataset.name);
+    if (!names.length) return;
+    try {
+      await navigator.clipboard.writeText(names.join("\n"));
+    } catch (err) {
+      console.warn("Name Forge | Clipboard write failed.", err);
+      return;
+    }
+    const label = button.innerHTML;
+    button.textContent = game.i18n.localize("NF.CopiedAll");
+    setTimeout(() => { button.innerHTML = label; }, 900);
   }
 
   _clampToViewport() {
