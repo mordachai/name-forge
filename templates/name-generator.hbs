@@ -43,23 +43,21 @@
       </div>
     </div>
 
-    {{#if showCompound}}
-    <div class="nf-row">
-      <label class="nf-checkbox-label" for="nf-compound">
+    <div class="nf-options">
+      <div class="nf-seg" role="group" aria-label="{{localize "NF.SourceLabel"}}">
+        <button type="button" class="nf-seg-btn" data-source="generated" aria-pressed="{{#if sourceReal}}false{{else}}true{{/if}}">{{localize "NF.SourceGenerated"}}</button>
+        <button type="button" class="nf-seg-btn" data-source="real" aria-pressed="{{#if sourceReal}}true{{else}}false{{/if}}" {{#unless sourceAvailable}}disabled{{/unless}}>{{localize "NF.SourceReal"}}</button>
+      </div>
+      {{#if showCompound}}
+      <label class="nf-chip" for="nf-compound">
         <input type="checkbox" id="nf-compound" name="compound" {{#if compound}}checked{{/if}} />
         {{localize "NF.CompoundNames"}}
       </label>
+      {{/if}}
     </div>
-    {{/if}}
+    <p class="nf-hint" id="nf-source-hint" {{#if sourceAvailable}}hidden{{/if}}>{{localize "NF.SourceUnavailable"}}</p>
 
-    <div class="nf-row">
-      <label class="nf-checkbox-label" for="nf-source" title="{{localize "NF.SourceNamesHint"}}">
-        <input type="checkbox" id="nf-source" name="source" {{#if source}}checked{{/if}} {{#unless sourceAvailable}}disabled{{/unless}} />
-        {{localize "NF.SourceNames"}}
-      </label>
-    </div>
-
-    <div class="nf-row nf-row-inline">
+    <div class="nf-actionbar">
       <div class="nf-count">
         <label for="nf-count">{{localize "NF.Count"}}</label>
         <input type="number" id="nf-count" name="count" min="1" max="30" value="{{count}}" />

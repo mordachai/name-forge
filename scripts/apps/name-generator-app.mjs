@@ -146,10 +146,13 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
       await this._saveSelection();
     });
 
-    root.querySelector("#nf-source")?.addEventListener("change", async ev => {
-      this.selection.source = ev.target.checked;
+    root.querySelectorAll(".nf-seg-btn").forEach(btn => btn.addEventListener("click", async () => {
+      this.selection.source = btn.dataset.source === "real";
+      this._syncSourceUi();
       await this._saveSelection();
-    });
+    }));
+
+    root.querySelector("[data-action='copy-all']")?.addEventListener("click", ev => this._copyAll(ev.currentTarget));
 
     root.querySelector("#nf-count")?.addEventListener("change", async ev => {
       this.selection.count = Number(ev.target.value) || 10;
@@ -320,6 +323,31 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
       button?.classList.remove("nf-busy");
       button && (button.disabled = false);
     }
+  }
+
+  /** Keeps the Generated / Real names toggle and its hint in step with the selected type. */
+  _syncSourceUi() {
+    const root = this.element;
+    const available = hasSourceNames(this.selection.typeValue);
+    const real = this.selection.source && available;
+    root.querySelector(".nf-seg-btn[data-source='real']").disabled = !available;
+    root.querySelector(".nf-seg-btn[data-source='real']").setAttribute("aria-pressed", String(real));
+    root.querySelector(".nf-seg-btn[data-source='generated']").setAttribute("aria-pressed", String(!real));
+    root.querySelector("#nf-source-hint").hidden = available;
+  }
+
+  async _copyAll(button) {
+    const names = [...this.element.querySelectorAll(".nf-result-name")].map(n => n.dataset.name);
+    if (!names.length) return;
+    try {
+      await navigator.clipboard.writeText(names.join("\n"));
+    } catch (err) {
+      console.warn("Name Forge | Clipboard write failed.", err);
+      return;
+    }
+    const label = button.innerHTML;
+    button.textContent = game.i18n.localize("NF.CopiedAll");
+    setTimeout(() => { button.innerHTML = label; }, 900);
   }
 
   _clampToViewport() {
