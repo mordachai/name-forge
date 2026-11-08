@@ -146,11 +146,10 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
       await this._saveSelection();
     });
 
-    root.querySelectorAll(".nf-seg-btn").forEach(btn => btn.addEventListener("click", async () => {
-      this.selection.source = btn.dataset.source === "real";
-      this._syncSourceUi();
+    root.querySelector("#nf-source")?.addEventListener("change", async ev => {
+      this.selection.source = ev.target.checked;
       await this._saveSelection();
-    }));
+    });
 
     root.querySelector("[data-action='copy-all']")?.addEventListener("click", ev => this._copyAll(ev.currentTarget));
 
@@ -325,14 +324,13 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
     }
   }
 
-  /** Keeps the Generated / Real names toggle and its hint in step with the selected type. */
+  /** Keeps the Real names switch and its hint in step with the selected type. */
   _syncSourceUi() {
     const root = this.element;
     const available = hasSourceNames(this.selection.typeValue);
-    const real = this.selection.source && available;
-    root.querySelector(".nf-seg-btn[data-source='real']").disabled = !available;
-    root.querySelector(".nf-seg-btn[data-source='real']").setAttribute("aria-pressed", String(real));
-    root.querySelector(".nf-seg-btn[data-source='generated']").setAttribute("aria-pressed", String(!real));
+    const box = root.querySelector("#nf-source");
+    box.disabled = !available;
+    box.checked = this.selection.source && available;
     root.querySelector("#nf-source-hint").hidden = available;
   }
 
