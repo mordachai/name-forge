@@ -48,6 +48,7 @@
 .nf-options {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   flex-wrap: wrap;
   gap: 8px 22px;
 }
@@ -292,10 +293,11 @@
   flex-direction: column;
   gap: 3px;
   flex-shrink: 0;
-  width: 110px;
+  width: 150px;
 }
 
 .nf-count label {
+  white-space: nowrap;
   font-size: 14px;
   font-weight: 600;
   color: var(--nf-muted);

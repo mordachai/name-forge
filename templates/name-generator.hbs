@@ -44,11 +44,6 @@
     </div>
 
     <div class="nf-options">
-      <label class="nf-switch" id="nf-source-switch" for="nf-source" {{#unless sourceAvailable}}hidden{{/unless}}>
-        <input type="checkbox" role="switch" id="nf-source" name="source" {{#if sourceReal}}checked{{/if}} />
-        <span class="nf-switch-track"></span>
-        <i class="fa-solid fa-book-open"></i> {{localize "NF.SourceReal"}} <i class="fa-regular fa-circle-question nf-help" tabindex="0" data-tooltip="{{localize 'NF.Tip.Real'}}"></i>
-      </label>
       {{#if showCompound}}
       <label class="nf-switch" for="nf-compound">
         <input type="checkbox" role="switch" id="nf-compound" name="compound" {{#if compound}}checked{{/if}} />
@@ -56,6 +51,11 @@
         <i class="fa-solid fa-user-tag"></i> {{localize "NF.CompoundNames"}} <i class="fa-regular fa-circle-question nf-help" tabindex="0" data-tooltip="{{localize 'NF.Tip.Full'}}"></i>
       </label>
       {{/if}}
+      <label class="nf-switch" id="nf-source-switch" for="nf-source" {{#unless sourceAvailable}}hidden{{/unless}}>
+        <input type="checkbox" role="switch" id="nf-source" name="source" {{#if sourceReal}}checked{{/if}} />
+        <span class="nf-switch-track"></span>
+        <i class="fa-solid fa-book-open"></i> {{localize "NF.SourceReal"}} <i class="fa-regular fa-circle-question nf-help" tabindex="0" data-tooltip="{{localize 'NF.Tip.Real'}}"></i>
+      </label>
     </div>
 
     <div class="nf-actionbar">
