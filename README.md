@@ -28,7 +28,13 @@ https://github.com/mordachai/name-forge/releases/latest/download/module.json
    (only shown when the genre has more than one), then the specific
    **Name Type** (e.g. "Elvish Male Names", "Towns and Cities").
 3. Set how many names (max. 30) to generate and click **Generate**.
-4. Click a name to copy it to the clipboard, or click the person-plus icon
+   Optional switches: **Full names** adds a surname (Historical / Real-World), and
+   **Real names only** picks names straight from the real-name lists instead of
+   generating new ones. The Real names switch only appears for types that have a
+   list (male and female names of real-world cultures, including By Country, plus
+   a few in Fantasy Common, Cyberpunk and Cthulhu Mythos). Hover the (?) next to
+   any label for a short explanation.
+4. Click a name to copy it to the clipboard (or **Copy all**), or click the person-plus icon
    next to it to immediately create an actor with that name, using the
    actor type chosen at the bottom of the window.
 
