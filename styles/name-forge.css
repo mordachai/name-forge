@@ -397,3 +397,16 @@
   align-items: center;
   gap: 6px;
 }
+
+.nf-help {
+  margin-left: 4px;
+  font-size: 11px;
+  color: var(--nf-muted);
+  cursor: help;
+}
+
+.nf-help:hover,
+.nf-help:focus-visible {
+  color: var(--nf-accent);
+  outline: none;
+}
