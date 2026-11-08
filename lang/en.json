@@ -7,6 +7,8 @@
   "NF.NameType": "Name Type",
   "NF.SearchNameType": "Search name types...",
   "NF.CompoundNames": "Compound names (first + surname)",
+  "NF.SourceNames": "Source names only (real names, no generation)",
+  "NF.SourceNamesHint": "Pick names straight from the real-name lists instead of generating new ones. Only available for people-name types that have a list.",
   "NF.Count": "Count (max. 30)",
   "NF.Generate": "Generate",
   "NF.Results": "Results",
