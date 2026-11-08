@@ -324,14 +324,12 @@ export class NameGeneratorApp extends HandlebarsApplicationMixin(ApplicationV2) 
     }
   }
 
-  /** Keeps the Real names switch and its hint in step with the selected type. */
+  /** Keeps the Real names switch in step with the selected type. */
   _syncSourceUi() {
     const root = this.element;
     const available = hasSourceNames(this.selection.typeValue);
-    const box = root.querySelector("#nf-source");
-    box.disabled = !available;
-    box.checked = this.selection.source && available;
-    root.querySelector("#nf-source-hint").hidden = available;
+    root.querySelector("#nf-source-switch").hidden = !available;
+    root.querySelector("#nf-source").checked = this.selection.source && available;
   }
 
   async _copyAll(button) {

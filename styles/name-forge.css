@@ -104,9 +104,8 @@
   outline-offset: 2px;
 }
 
-.nf-switch:has(input:disabled) {
-  opacity: 0.45;
-  cursor: not-allowed;
+.nf-switch[hidden] {
+  display: none;
 }
 
 .nf-row label i,

@@ -10,7 +10,6 @@
   "NF.SourceLabel": "Name source",
   "NF.SourceGenerated": "Generated",
   "NF.SourceReal": "Real names only",
-  "NF.SourceUnavailable": "This type has no real-name list, so its names are always generated.",
   "NF.CopyAll": "Copy all",
   "NF.CopiedAll": "Copied!",
   "NF.Tip.Genre": "The setting the names belong to, such as Fantasy, Historical or a game universe.",

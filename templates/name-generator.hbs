@@ -44,8 +44,8 @@
     </div>
 
     <div class="nf-options">
-      <label class="nf-switch" for="nf-source">
-        <input type="checkbox" role="switch" id="nf-source" name="source" {{#if sourceReal}}checked{{/if}} {{#unless sourceAvailable}}disabled{{/unless}} />
+      <label class="nf-switch" id="nf-source-switch" for="nf-source" {{#unless sourceAvailable}}hidden{{/unless}}>
+        <input type="checkbox" role="switch" id="nf-source" name="source" {{#if sourceReal}}checked{{/if}} />
         <span class="nf-switch-track"></span>
         <i class="fa-solid fa-book-open"></i> {{localize "NF.SourceReal"}} <i class="fa-regular fa-circle-question nf-help" tabindex="0" data-tooltip="{{localize 'NF.Tip.Real'}}"></i>
       </label>
@@ -57,7 +57,6 @@
       </label>
       {{/if}}
     </div>
-    <p class="nf-hint" id="nf-source-hint" {{#if sourceAvailable}}hidden{{/if}}>{{localize "NF.SourceUnavailable"}}</p>
 
     <div class="nf-actionbar">
       <div class="nf-count">
